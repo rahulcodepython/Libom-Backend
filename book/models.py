@@ -15,7 +15,8 @@ class Book(models.Model):
 
 STATE_CHOICES = [
     ("approved", "Approved"),
-    ("unapproved", "Not Approved"),
+    ("cancel", "Cancel"),
+    ("pending", "Pending"),
 ]
 
 
@@ -24,7 +25,7 @@ class Borrowing(models.Model):
     isbn_no = models.CharField(max_length=13)
     user = models.ForeignKey("authentication.User", on_delete=models.CASCADE)
     date = models.DateField(auto_now_add=True)
-    state = models.CharField(max_length=10, choices=STATE_CHOICES, default="unapproved")
+    state = models.CharField(max_length=10, choices=STATE_CHOICES, default="pending")
 
     def __str__(self):
         return f"Borrowing {self.id} by {self.user.username}"
@@ -35,8 +36,8 @@ class Returning(models.Model):
     isbn_no = models.CharField(max_length=13)
     user = models.ForeignKey("authentication.User", on_delete=models.CASCADE)
     borrow_date = models.DateField()
-    return_date = models.DateField()
-    state = models.CharField(max_length=10, choices=STATE_CHOICES, default="unapproved")
+    return_date = models.DateField(null=True, blank=True)
+    state = models.CharField(max_length=10, choices=STATE_CHOICES, default="pending")
 
     def __str__(self):
         return f"Returning {self.id} by {self.user.username}"

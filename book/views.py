@@ -5,14 +5,16 @@ from .serializers import (
     EditBookSerializer,
     BookSingleSerializer,
     BookListSerializer,
+    BorrowingSerializer,
 )
 from backend.decorators import catch_exception
 from backend.message import Message
 from django.shortcuts import get_object_or_404
-from .models import Book, Borrowing
+from .models import Book, Borrowing, Returning
 from datetime import date
 import uuid
 from authentication.models import Profile
+from datetime import timedelta
 
 today = date.today()
 
@@ -68,6 +70,15 @@ class BorrowRequestView(APIView):
 
     @catch_exception
     def get(self, request, isbn_no, *args, **kwargs):
+        profile = Profile.objects.get(user=request.user)
+        plan = profile.subscription
+
+        if profile.holdings_no >= plan.max_borrow:
+            return Message.error("You have reached the maximum borrow limit.")
+
+        if (profile.subscription_date + timedelta(days=plan.duration)) < today:
+            return Message.error("Your subscription has expired.")
+
         book = get_object_or_404(Book, isbn_no=isbn_no)
         Borrowing.objects.create(
             isbn_no=book.isbn_no, user=request.user, id=f"{today}-{uuid.uuid4()}"
@@ -75,3 +86,57 @@ class BorrowRequestView(APIView):
         profile = Profile.objects.get(user=request.user)
         profile.pendings.add(book)
         return Message.create("Borrow request is created.")
+
+
+class BorrowRequestListView(APIView):
+    permission_classes = [permissions.IsAdminUser]
+
+    @catch_exception
+    def get(self, request, *args, **kwargs):
+        borrowings = Borrowing.objects.all()
+        serializer = BorrowingSerializer(borrowings, many=True)
+        return response.Response(serializer.data)
+
+
+class BorrowApproveView(APIView):
+    permission_classes = [permissions.IsAdminUser]
+
+    @catch_exception
+    def post(self, request, id, *args, **kwargs):
+        borrowing = get_object_or_404(Borrowing, id=id)
+        book = get_object_or_404(Book, isbn_no=borrowing.isbn_no)
+        profile = Profile.objects.get(user=borrowing.user)
+
+        if book.quantity < 1:
+            return Message.error("Book is out of stock.")
+
+        book.quantity -= 1
+        book.save()
+
+        profile.pendings.remove(book)
+        profile.holdings.add(book)
+        profile.holdings_no += 1
+        profile.save()
+
+        borrowing.status = "approved"
+        borrowing.save()
+
+        Returning.objects.create(
+            isbn_no=borrowing.isbn_no,
+            user=borrowing.user,
+            id=f"{today}-{uuid.uuid4()}",
+            borrow_date=borrowing.date,
+        )
+
+        return Message.success("Borrow request is approved.")
+
+
+class BorrowRejectView(APIView):
+    permission_classes = [permissions.IsAdminUser]
+
+    @catch_exception
+    def post(self, request, id, *args, **kwargs):
+        borrowing = get_object_or_404(Borrowing, id=id)
+        borrowing.state = "cancel"
+        borrowing.save()
+        return Message.success("Borrow request is rejected.")

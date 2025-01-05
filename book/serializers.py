@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Book
+from .models import Book, Borrowing
 from authentication.models import Profile
 
 
@@ -51,3 +51,9 @@ class BookListSerializer(BookSerializer):
 
         profile = Profile.objects.get(user=user)
         return profile.pendings.filter(isbn_no=obj.isbn_no).exists()
+
+
+class BorrowingSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Borrowing
+        fields = "__all__"
