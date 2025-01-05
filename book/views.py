@@ -16,6 +16,7 @@ from datetime import date
 import uuid
 from authentication.models import Profile
 from datetime import timedelta
+from rest_framework import status
 
 today = date.today()
 
@@ -174,3 +175,33 @@ class ReturnApproveView(APIView):
         returning.save()
 
         return Message.success("Borrow request is approved.")
+
+
+class BorrowedBookListView(APIView):
+    permission_classes = [permissions.IsAuthenticated]
+
+    @catch_exception
+    def get(self, request, *args, **kwargs):
+        profile = Profile.objects.get(user=request.user)
+        max_borrow_duration = profile.subscription.max_borrow
+        holdings = profile.holdings.all()
+
+        response_data = []
+
+        for holding in holdings:
+            returning = Returning.objects.filter(
+                user=request.user, isbn_no=holding.isbn_no, state="pending"
+            ).first()
+            if not returning:
+                continue
+
+            response_data.append(
+                {
+                    "book": holding.name,
+                    "borrow_date": returning.borrow_date,
+                    "max_return_date": returning.borrow_date
+                    + timedelta(days=max_borrow_duration),
+                }
+            )
+
+        return response.Response(response_data, status=status.HTTP_200_OK)

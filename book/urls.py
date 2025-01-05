@@ -36,4 +36,9 @@ urlpatterns = [
         views.ReturnApproveView.as_view(),
         name="return-approve",
     ),
+    path(
+        "list/borrowed/",
+        views.BorrowedBookListView.as_view(),
+        name="borrowed-book-list",
+    ),
 ]
