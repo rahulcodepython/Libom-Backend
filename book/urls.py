@@ -26,4 +26,14 @@ urlpatterns = [
         views.BorrowRejectView.as_view(),
         name="borrow-reject",
     ),
+    path(
+        "list/return/request/",
+        views.ReturnRequestListView.as_view(),
+        name="return-request-list",
+    ),
+    path(
+        "return/approve/<str:id>/",
+        views.ReturnApproveView.as_view(),
+        name="return-approve",
+    ),
 ]

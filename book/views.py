@@ -6,6 +6,7 @@ from .serializers import (
     BookSingleSerializer,
     BookListSerializer,
     BorrowingSerializer,
+    ReturningSerializer,
 )
 from backend.decorators import catch_exception
 from backend.message import Message
@@ -140,3 +141,36 @@ class BorrowRejectView(APIView):
         borrowing.state = "cancel"
         borrowing.save()
         return Message.success("Borrow request is rejected.")
+
+
+class ReturnRequestListView(APIView):
+    permission_classes = [permissions.IsAdminUser]
+
+    @catch_exception
+    def get(self, request, *args, **kwargs):
+        returnings = Returning.objects.all()
+        serializer = ReturningSerializer(returnings, many=True)
+        return response.Response(serializer.data)
+
+
+class ReturnApproveView(APIView):
+    permission_classes = [permissions.IsAdminUser]
+
+    @catch_exception
+    def post(self, request, id, *args, **kwargs):
+        returning = get_object_or_404(Returning, id=id)
+        book = get_object_or_404(Book, isbn_no=returning.isbn_no)
+        profile = Profile.objects.get(user=returning.user)
+
+        book.quantity += 1
+        book.save()
+
+        profile.holdings.remove(book)
+        profile.holdings_no -= 1
+        profile.save()
+
+        returning.state = "approved"
+        returning.return_date = today
+        returning.save()
+
+        return Message.success("Borrow request is approved.")
