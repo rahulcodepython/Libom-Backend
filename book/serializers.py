@@ -1,5 +1,6 @@
 from rest_framework import serializers
 from .models import Book
+from authentication.models import Profile
 
 
 class BookSerializer(serializers.ModelSerializer):
@@ -26,3 +27,18 @@ class EditBookSerializer(BookSerializer):
 class BookSingleSerializer(BookSerializer):
     class Meta(BookSerializer.Meta):
         fields = "__all__"
+
+
+class BookListSerializer(BookSerializer):
+    borrowed = serializers.SerializerMethodField()
+
+    class Meta(BookSerializer.Meta):
+        fields = "__all__"
+
+    def get_borrowed(self, obj):
+        user = self.context["request"].user
+        if user.is_anonymous:
+            return False
+
+        profile = Profile.objects.get(user=user)
+        return profile.holdings.filter(isbn_no=obj.isbn_no).exists()

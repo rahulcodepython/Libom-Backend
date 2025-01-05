@@ -1,6 +1,11 @@
 from rest_framework.views import APIView
 from rest_framework import permissions, response
-from .serializers import CreateBookSerializer, EditBookSerializer, BookSingleSerializer
+from .serializers import (
+    CreateBookSerializer,
+    EditBookSerializer,
+    BookSingleSerializer,
+    BookListSerializer,
+)
 from backend.decorators import catch_exception
 from backend.message import Message
 from django.shortcuts import get_object_or_404
@@ -39,4 +44,15 @@ class BookSingleView(APIView):
     def get(self, request, isbn_no, *args, **kwargs):
         book_instance = get_object_or_404(Book, isbn_no=isbn_no)
         serializer = BookSingleSerializer(book_instance)
+        return response.Response(serializer.data)
+
+
+class BookListView(APIView):
+    permission_classes = [permissions.AllowAny]
+
+    @catch_exception
+    def get(self, request, *args, **kwargs):
+        books = Book.objects.all()
+        print(books)
+        serializer = BookListSerializer(books, many=True, context={"request": request})
         return response.Response(serializer.data)
