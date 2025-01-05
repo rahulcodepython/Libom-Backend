@@ -11,8 +11,10 @@ from backend.decorators import catch_exception
 
 class SubscriptionView(APIView):
     def get(self, request):
-        subscriptions = Subscribe.objects.all()
-        serializer = SubscriptionSerializer(subscriptions, many=True)
+        subscriptions = Subscribe.objects.all().order_by("id")
+        serializer = SubscriptionSerializer(
+            subscriptions, many=True, context={"request": request}
+        )
         return Response(serializer.data, status=status.HTTP_200_OK)
 
 

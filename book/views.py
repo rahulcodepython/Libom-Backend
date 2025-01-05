@@ -118,7 +118,7 @@ class BorrowApproveView(APIView):
         profile.holdings_no += 1
         profile.save()
 
-        borrowing.status = "approved"
+        borrowing.state = "approved"
         borrowing.save()
 
         Returning.objects.create(
