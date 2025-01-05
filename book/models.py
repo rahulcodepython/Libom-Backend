@@ -1,8 +1,4 @@
 from django.db import models
-from datetime import date
-import uuid
-
-today = date.today()
 
 
 class Book(models.Model):
@@ -33,12 +29,6 @@ class Borrowing(models.Model):
     def __str__(self):
         return f"Borrowing {self.id} by {self.user.username}"
 
-    def save(self, *args, **kwargs):
-        if not id:
-            self.id = today + uuid.uuid4()
-
-        return super().save(*args, **kwargs)
-
 
 class Returning(models.Model):
     id = models.CharField(primary_key=True, unique=True)
@@ -50,9 +40,3 @@ class Returning(models.Model):
 
     def __str__(self):
         return f"Returning {self.id} by {self.user.username}"
-
-    def save(self, *args, **kwargs):
-        if not id:
-            self.id = today + uuid.uuid4()
-
-        return super().save(*args, **kwargs)

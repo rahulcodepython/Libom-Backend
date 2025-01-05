@@ -126,6 +126,7 @@ class Profile(models.Model):
     year_borrow = models.PositiveIntegerField(default=0)
     holdings_no = models.PositiveIntegerField(default=0)
     holdings = models.ManyToManyField(Book, blank=True)
+    pendings = models.ManyToManyField(Book, blank=True, related_name="pendings")
 
     def __str__(self):
         return f"{self.user.username}'s Profile"

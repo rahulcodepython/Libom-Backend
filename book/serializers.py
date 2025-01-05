@@ -31,6 +31,7 @@ class BookSingleSerializer(BookSerializer):
 
 class BookListSerializer(BookSerializer):
     borrowed = serializers.SerializerMethodField()
+    request_pending = serializers.SerializerMethodField()
 
     class Meta(BookSerializer.Meta):
         fields = "__all__"
@@ -42,3 +43,11 @@ class BookListSerializer(BookSerializer):
 
         profile = Profile.objects.get(user=user)
         return profile.holdings.filter(isbn_no=obj.isbn_no).exists()
+
+    def get_request_pending(self, obj):
+        user = self.context["request"].user
+        if user.is_anonymous:
+            return False
+
+        profile = Profile.objects.get(user=user)
+        return profile.pendings.filter(isbn_no=obj.isbn_no).exists()

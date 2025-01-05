@@ -9,7 +9,12 @@ from .serializers import (
 from backend.decorators import catch_exception
 from backend.message import Message
 from django.shortcuts import get_object_or_404
-from .models import Book
+from .models import Book, Borrowing
+from datetime import date
+import uuid
+from authentication.models import Profile
+
+today = date.today()
 
 
 class BookCreateView(APIView):
@@ -56,3 +61,17 @@ class BookListView(APIView):
         print(books)
         serializer = BookListSerializer(books, many=True, context={"request": request})
         return response.Response(serializer.data)
+
+
+class BorrowRequestView(APIView):
+    permission_classes = [permissions.IsAuthenticated]
+
+    @catch_exception
+    def get(self, request, isbn_no, *args, **kwargs):
+        book = get_object_or_404(Book, isbn_no=isbn_no)
+        Borrowing.objects.create(
+            isbn_no=book.isbn_no, user=request.user, id=f"{today}-{uuid.uuid4()}"
+        )
+        profile = Profile.objects.get(user=request.user)
+        profile.pendings.add(book)
+        return Message.create("Borrow request is created.")

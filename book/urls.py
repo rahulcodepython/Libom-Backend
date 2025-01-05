@@ -6,4 +6,9 @@ urlpatterns = [
     path("edit/<str:isbn_no>/", views.BookEditView.as_view(), name="book-edit"),
     path("book/<str:isbn_no>/", views.BookSingleView.as_view(), name="book-single"),
     path("list/", views.BookListView.as_view(), name="book-list"),
+    path(
+        "borrow/request/<str:isbn_no>/",
+        views.BorrowRequestView.as_view(),
+        name="borrow-request",
+    ),
 ]
