@@ -389,10 +389,7 @@ class CreateJWTView(views.APIView):
             login_code.delete()
 
             return response.Response(
-                {
-                    **get_tokens_for_user(user),
-                    "user": serializers.UserSerializer(user).data,
-                },
+                get_tokens_for_user(user),
                 status=status.HTTP_200_OK,
             )
 
