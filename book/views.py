@@ -62,7 +62,6 @@ class BookListView(APIView):
     @catch_exception
     def get(self, request, *args, **kwargs):
         books = Book.objects.all()
-        print(books)
         serializer = BookListSerializer(books, many=True, context={"request": request})
         return response.Response(serializer.data)
 

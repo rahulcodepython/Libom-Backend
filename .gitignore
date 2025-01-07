@@ -2,3 +2,4 @@ static
 .env
 .venv
 data
+.env.prod

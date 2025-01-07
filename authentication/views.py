@@ -360,7 +360,6 @@ class CreateJWTView(views.APIView):
                 return Message.error(
                     msg="Your email or password is not correct. Try again."
                 )
-
             return response.Response(
                 get_tokens_for_user(user),
                 status=status.HTTP_200_OK,
@@ -574,7 +573,6 @@ class CheckEmailView(views.APIView):
     @catch_exception
     def post(self, request):
         email = request.data["email"]
-        print("Email", email)
 
         if User.objects.filter(email__icontains=email).exists():
             return Message.error(msg="Email is already taken. Try another one.")
