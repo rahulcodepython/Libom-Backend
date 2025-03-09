@@ -21,7 +21,7 @@ STATE_CHOICES = [
 
 
 class Borrowing(models.Model):
-    id = models.CharField(primary_key=True, unique=True)
+    id = models.CharField(primary_key=True, unique=True, max_length=1000)
     isbn_no = models.CharField(max_length=13)
     user = models.ForeignKey("authentication.User", on_delete=models.CASCADE)
     date = models.DateField(auto_now_add=True)
@@ -32,7 +32,7 @@ class Borrowing(models.Model):
 
 
 class Returning(models.Model):
-    id = models.CharField(primary_key=True, unique=True)
+    id = models.CharField(primary_key=True, unique=True, max_length=1000)
     isbn_no = models.CharField(max_length=13)
     user = models.ForeignKey("authentication.User", on_delete=models.CASCADE)
     borrow_date = models.DateField()

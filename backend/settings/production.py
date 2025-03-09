@@ -25,7 +25,8 @@ DATABASES = {
 }
 
 # CORS Configuration
-CORS_ALLOWED_ORIGINS = ["http://localhost", "http://localhost:80"]
+CORS_ALLOWED_ORIGINS = ["http://localhost", "http://localhost:80",
+                        "http://localhost:3000", "http://frontend:3000"]
 
 SEND_LOGIN_CONFIRMATION_EMAIL = False
 
