@@ -22,8 +22,12 @@ COPY templates ./templates
 COPY transaction ./transaction
 COPY .env.prod .env
 COPY manage.py .
+COPY entrypoint.sh .
 
 ENV ENVIRONMENT=production
+
+# Run entrypoint.sh
+ENTRYPOINT ["/app/entrypoint.sh"]
 
 # RUN python manage.py makemigrations
 # RUN python manage.py migrate
